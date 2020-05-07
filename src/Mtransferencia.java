@@ -10,7 +10,7 @@ public class Mtransferencia {
 
 
     public double[][] mudaestado(int filial){
-        /* vamos experimentar o caso em que muda do estado (1,12) para (4,9) sendo a decisao no final do dia nao transferir
+        /* vamos experimentar o caso em que muda do estado 1  para o 4  sendo a decisao no final do dia nao transferir
             Na filial 1 isto tem as seguintes possibilidades para isto acontecer
                 - 3 entregas e 0 pedidos
                 - 4 entregas e 1 pedido
@@ -27,12 +27,8 @@ public class Mtransferencia {
                 - 4 entregues e 11 pedidos ( 1 bem sucedido e 10 insatisfeito)
                 - 4 entregues e 12 pedidos ( 1 bem sucedido e 11 insatisfeito)
         */
-        // vamos assumir que estamos sempre na decisao de nao transferir carros da filial 1 para a 2 - equivale - a 1 decisao e fazer os 13 estados e as 13 possilidades para a filial 1 para
-        // mas ainda existe o sentido posto da 2 para 1
+        // vamos assumir que estamos sempre na decisao de nao transferir carros da filial 1 para a 2
         // sendo a deicsao nao transferir carros em qualquer decisao
-        // os estados possiveis no final do dia(estagio) sao
-        // vou fazer a primeira linha a onde o estado inicial é 0 e pode passar para 0 1 2 3 ... 12
-        // depois de fazer a 1 linha falta fazer as restantes 12 para a filial 1 e de seguida fazer a final 2 e fazer "merge" para ter a matrix 169 por 169
         double[][] matrix = new double[13][13];
         double p= 0;
         double total = 0;
@@ -41,22 +37,22 @@ public class Mtransferencia {
 
             for (int finall = 0; finall < 13; finall ++) { // faz uma linha
 
-                p += getParticularCase(inicial, finall, filial);
+                p += getParticularCase(inicial, finall, filial); // faz os casos particulares
 
-                for (count = inicial; count <= 12; count++) { // faz uma conta
+                for (count = inicial; count <= 12; count++) { // faz as contas para uma posicao
 
-                    if (filial == 1) {
+                    if (filial == 1) { // isto é so para ver qual das filiais é que estamos a fazer
                         p += entregas1[finall] * pedidos1[count];
                     } else if (filial == 2) {
                         p += entregas2[finall] * pedidos2[count];
                     }
                 }
-                matrix[inicial][finall] = p;
-                total += p;
+                matrix[inicial][finall] = p; // dps da conta estar feita guarda na matrix
+                total += p; // serve so para verificar se o valor total da linha esta correto
                 p = 0;
 
             }
-            System.out.println(inicial +" : " + total);
+            //System.out.println(inicial +" : " + total);
             total = 0;
             p = 0;
         }
@@ -75,6 +71,7 @@ public class Mtransferencia {
         tmpfinal--;
         tmpinicial--;
 
+        // casos que o algoritmo de cima nao cobre que dependem da diferença entre estados
         if(diff < 0 ){
             while(tmpfinal>= 0){
                 if(filial == 1){
@@ -88,8 +85,6 @@ public class Mtransferencia {
                 tmpinicial--;
             }
 
-
-
         }else if(diff == 0){
             for(int i = 0; i < inicial;i++){
                 if(filial == 1){
@@ -101,7 +96,7 @@ public class Mtransferencia {
                 }
 
             }
-        }else{
+        }else{ // caso a diff seja maior que zero
             while (tmpdiff < finall) {
                 if (filial == 1) {
                     res += entregas1[diff + count] * pedidos1[count];
@@ -113,7 +108,8 @@ public class Mtransferencia {
                 tmpdiff++;
             }
         }
-        //System.out.println("res" + finall + ":"+ res);
+
+        // caso especial para o estado 12 que temos de fazer as contas para a possiblidades de overflow
         if(finall==12){
             int tmpoverflow = 12;
             int tmp = inicial;
@@ -151,10 +147,36 @@ public class Mtransferencia {
     }
 
 
+
+    //P(a,b)-(c,d) = F(a,c)*F(b,d)
     private double[][] multiplyMatrix(double[][] filial1,double[][] filial2){
         double[][] matrix = new double[169][169];
+        double totallinha = 0.0;
+        int linha = 0;
+        int coluna = 0;
+        for(int a = 0; a <13; a++){
 
+            for(int b =0; b<13;b++) {
 
+                for (int c = 0; c < 13; c++) {
+
+                    for (int d = 0; d < 13; d++) {
+                        //P(a,b)-(c,d) = F(a,c)*F(b,d)
+                        matrix[linha][coluna] = filial1[a][c] * filial2[b][d];
+                        //System.out.print(filial1[a][c] * filial2[b][d]);
+                        //System.out.print(", ");
+                        totallinha += filial1[a][c] * filial2[b][d];
+                        coluna++;
+                    }
+
+                }
+                linha++;
+                System.out.println(linha + " : "+totallinha);
+                //System.out.println("\n");
+                totallinha = 0.0;
+                coluna = 0;
+            }
+        }
 
         return matrix;
     }
@@ -164,6 +186,9 @@ public class Mtransferencia {
         Mtransferencia m = new Mtransferencia();
         double[][] filial1= m.mudaestado(1);
         double[][] filial2= m.mudaestado(2);
+        m.multiplyMatrix(filial1,filial2);
+
+
 
 
 
