@@ -6,7 +6,7 @@ public class Mtransferencia {
     private double[] entregas1= {0.0128,0.0636,0.1176,0.1780,0.2072,0.1564,0.1136 ,0.0708,0.0440,0.0208,0.0088,0.0044,0.0020};
     private double[] pedidos2={0.0340,0.0724,0.1204,0.1456,0.1356,0.1240,0.1004,0.0828,0.0612,0.0512,0.0368,0.0284,0.0072};
     private double[] entregas2= {0.0224,0.0828,0.1788,0.2112,0.1836,0.1452,0.0920,0.0468,0.0264,0.0072,0.0024,0.0004,0.0008};
-    private double[][] matrix = new double[13][13];
+
 
 
     public double[][] mudaestado(int filial){
