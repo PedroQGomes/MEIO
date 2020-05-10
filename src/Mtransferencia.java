@@ -10,28 +10,8 @@ public class Mtransferencia {
 
 
     public double[][] mudaestado(int filial){
-        /* vamos experimentar o caso em que muda do estado 1  para o 4  sendo a decisao no final do dia nao transferir
-            Na filial 1 isto tem as seguintes possibilidades para isto acontecer
-                - 3 entregas e 0 pedidos
-                - 4 entregas e 1 pedido
-                casos insatisfeitos
-                - 4 entregues e 2 pedidos ( 1 bem sucedido e 1 insatisfeito)
-                - 4 entregues e 3 pedidos ( 1 bem sucedido e 2 insatisfeito)
-                - 4 entregues e 4 pedidos ( 1 bem sucedido e 3 insatisfeito)
-                - 4 entregues e 5 pedidos ( 1 bem sucedido e 4 insatisfeito)
-                - 4 entregues e 6 pedidos ( 1 bem sucedido e 5 insatisfeito)
-                - 4 entregues e 7 pedidos ( 1 bem sucedido e 6 insatisfeito)
-                - 4 entregues e 8 pedidos ( 1 bem sucedido e 7 insatisfeito)
-                - 4 entregues e 9 pedidos ( 1 bem sucedido e 8 insatisfeito)
-                - 4 entregues e 10 pedidos ( 1 bem sucedido e 9 insatisfeito)
-                - 4 entregues e 11 pedidos ( 1 bem sucedido e 10 insatisfeito)
-                - 4 entregues e 12 pedidos ( 1 bem sucedido e 11 insatisfeito)
-        */
-        // vamos assumir que estamos sempre na decisao de nao transferir carros da filial 1 para a 2
-        // sendo a deicsao nao transferir carros em qualquer decisao
         double[][] matrix = new double[13][13];
         double p= 0;
-        double total = 0;
         int count;
         for(int inicial = 0; inicial < 13;inicial++ ) { // faz a natrix td
 
@@ -48,16 +28,12 @@ public class Mtransferencia {
                     }
                 }
                 matrix[inicial][finall] = p; // dps da conta estar feita guarda na matrix
-                total += p; // serve so para verificar se o valor total da linha esta correto
+
                 p = 0;
 
             }
-            //System.out.println(inicial +" : " + total);
-            total = 0;
             p = 0;
         }
-        //System.out.println(total);
-        //printMatrix(filial);
         return matrix;
     }
 
@@ -110,6 +86,14 @@ public class Mtransferencia {
         }
 
         // caso especial para o estado 12 que temos de fazer as contas para a possiblidades de overflow
+        res += addOverflow(inicial,finall,diff,filial);
+
+        return res;
+
+    }
+
+    private double addOverflow(int inicial,int finall,int diff,int filial){
+        double res = 0.0;
         if(finall==12){
             int tmpoverflow = 12;
             int tmp = inicial;
@@ -130,28 +114,24 @@ public class Mtransferencia {
             }
 
         }
-
-
-
         return res;
-
     }
 
 
-    private void printMatrix(double[][] matrix,int linhas, int colunas){
+    public void printMatrix(double[][] matrix,int linhas, int colunas){
         for(int i = 0; i< linhas;i++){
             for(int j = 0; j< colunas;j++){
-                System.out.println(matrix[i][j]);
+                System.out.print(matrix[i][j]+",");
             }
+            System.out.print("\n");
         }
     }
 
 
 
     //P(a,b)-(c,d) = F(a,c)*F(b,d)
-    private double[][] multiplyMatrix(double[][] filial1,double[][] filial2){
+    public double[][] multiplyMatrix(double[][] filial1,double[][] filial2){
         double[][] matrix = new double[169][169];
-        double totallinha = 0.0;
         int linha = 0;
         int coluna = 0;
         for(int a = 0; a <13; a++){
@@ -163,31 +143,144 @@ public class Mtransferencia {
                     for (int d = 0; d < 13; d++) {
                         //P(a,b)-(c,d) = F(a,c)*F(b,d)
                         matrix[linha][coluna] = filial1[a][c] * filial2[b][d];
-                        //System.out.print(filial1[a][c] * filial2[b][d]);
-                        //System.out.print(", ");
-                        totallinha += filial1[a][c] * filial2[b][d];
                         coluna++;
                     }
 
                 }
                 linha++;
-                System.out.println(linha + " : "+totallinha);
-                //System.out.println("\n");
-                totallinha = 0.0;
                 coluna = 0;
             }
         }
 
         return matrix;
     }
+    
+
+    public void sumline(double[][] m,int linhas,int colunas){
+        double count = 0.0;
+        for(int a = 0; a <linhas; a++){
+
+            for(int b =0; b<colunas;b++) {
+                count += m[a][b];
+
+            }
+            System.out.println(count);
+            count = 0;
+
+        }
+
+    }
 
 
-    public static void main(String[] args){
+
+    private double[][] shiftReceberX(double[][] nt,int x){
+        double[][]recebe3 = new double[13][13];
+        for(int j = 0;j < x;j++ ) {
+            for (int i = 0; i < 13; i++) { // primeira c's coluna l-c sao sempre 0 visto que é impossivel acontecer visto que assumimos que recebe sempre x carros
+                recebe3[i][j] = 0;
+            }
+        }
+
+        for(int c = x;c < 13;c++){
+            for(int l = 0;l < 13;l++){
+                if(c == 12){
+                    recebe3[l][c] = nt[l][c-1] + nt[l][c];
+                }else{
+                    recebe3[l][c] = nt[l][c-1];
+                }
+
+            }
+
+        }
+
+
+        return recebe3;
+    }
+
+    private double[][] shiftTransfereX(double[][] nt,int x){
+
+        int maxCol = 13-x;
+        double[][] transferex = new double[13][13];
+        double tmp = 0.0;
+        for(int l = 0; l< 13;l++){
+            for(int c = 0; c< maxCol;c++){
+                if(c == 0){
+                    transferex[l][c] = nt[l][c] + nt[l][c + 1];
+                }else {
+                    transferex[l][c] = nt[l][c + 1];
+                }
+            }
+        }
+
+
+        return transferex;
+    }
+
+
+
+
+
+    public void teste(String[] args){
         Mtransferencia m = new Mtransferencia();
-        double[][] filial1= m.mudaestado(1);
-        double[][] filial2= m.mudaestado(2);
-        m.multiplyMatrix(filial1,filial2);
 
+        //nao transfere, filial 1, filial 2 e matriz 169x169 -- Verified
+        double[][] nTF1= m.mudaestado(1);
+        double[][] nTF2= m.mudaestado(2);
+        double[][] nTmax = m.multiplyMatrix(nTF1,nTF2);
+
+        //receber 1/2/3 filial 1 -- Verified
+        double[][] recebe1F1 = m.shiftReceberX(nTF1,1);
+        double[][] recebe2F1 = m.shiftReceberX(recebe1F1,2);
+        double[][] recebe3F1 = m.shiftReceberX(recebe2F1,3);
+
+        //transferir 1/2/3 filial 1 -- Verified
+        double[][] transfere1F1 = m.shiftTransfereX(nTF1,1);
+        double[][] transfere2F1 = m.shiftTransfereX(transfere1F1,1);
+        double[][] transfere3F1 = m.shiftTransfereX(transfere2F1,1);
+
+        //receber 1/2/3 filial 2 -- Verified
+        double[][] recebe1F2 = m.shiftReceberX(nTF2,1);
+        double[][] recebe2F2 = m.shiftReceberX(recebe1F2,2);
+        double[][] recebe3F2 = m.shiftReceberX(recebe2F2,3);
+
+        //transferir 1/2/3 filial 2 -- Verified
+        double[][] transfere1F2 = m.shiftTransfereX(nTF2,1);
+        double[][] transfere2F2 = m.shiftTransfereX(transfere1F2,1);
+        double[][] transfere3F2 = m.shiftTransfereX(transfere2F2,1);
+
+        // FILIAL 1   FILIAL 2
+        //
+        // recebe 1 transfere 1 -- Verified
+        double[][] recebe1F1_F2_MAX= m.multiplyMatrix(recebe1F1,transfere1F2);
+
+        // recebe 2 transfere 2 -- Verified
+        double[][] recebe2F1_F2_MAX= m.multiplyMatrix(recebe2F1,transfere2F2);
+
+        // recebe 3 transfere 3 -- Verified
+        double[][] recebe3F1_F2_MAX= m.multiplyMatrix(recebe3F1,transfere3F2);
+
+        // transfere 1 recebe 1 -- Verified
+        double[][] transfere1F1_F2_MAX= m.multiplyMatrix(transfere1F1,recebe1F2);
+
+        // transfere 2 recebe 2 -- Verified
+        double[][] transfere2F1_F2_MAX= m.multiplyMatrix(transfere2F1,recebe2F2);
+
+        // transfere 3 recebe 3 -- Verified
+        double[][] transfere3F1_F2_MAX= m.multiplyMatrix(transfere3F1,recebe3F2);
+
+
+
+        /*
+        m.sumline(transfere1F2,13,13);
+        System.out.println("next");
+
+        m.sumline(transfere2F2,13,13);
+        System.out.println("next");
+
+        m.sumline(transfere3F2,13,13);
+        System.out.println("next");
+        */
+        //m.printMatrix(recebe3F1,13,13);
 
 
 
