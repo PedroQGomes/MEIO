@@ -1,24 +1,67 @@
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
+import java.io.*;
+import java.time.LocalDate;
+import java.util.ArrayList;
 
 public class Main {
 
     public static void main(String[] args){
         Mcusto mCusto = new Mcusto();
         Mtransferencia mTransf = new Mtransferencia();
+        //matrixToExel(mTransf,mCusto);
 
-
-        matrixToExel(mTransf,mCusto);
         mkmodel(mTransf,mCusto);
 
     }
 
 
     private static void matrixToExel(Mtransferencia transf,Mcusto custo){
+        String FILE_NAME;
+
+        FILE_NAME = "tmp.xlsx";
+
+        //FILE_NAME = "Mcustos.xlsx";
+
+
+        XSSFWorkbook workbook = new XSSFWorkbook();
+        Sheet sheet = workbook.createSheet("transfere 3");
+        double[][] matriz = custo.getMatrizCusto(6);
+
+
+
+        int rowNum = 0;
+        int colNum = 0;
+
+
+        for (int l = 0; l < 169;l++){
+            Row row = sheet.createRow(rowNum++);
+            colNum = 0;
+            for(int c = 0; c < 169;c++) {
+                Cell cell = row.createCell(colNum++);
+                cell.setCellValue(matriz[l][c]);
+            }
+        }
+
+
+
+        try {
+            FileOutputStream outputStream = new FileOutputStream(FILE_NAME);
+            workbook.write(outputStream);
+            workbook.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        System.out.println("Done");
 
 
 
 
     }
+
 
 
     public static void mkmodel(Mtransferencia transf,Mcusto custo){
@@ -89,7 +132,7 @@ public class Main {
         System.out.print("\n");
         System.out.println("print do dn");
         for(int b = 0; b < maxiter;b++) {
-            for (int a = 0; a < 2; a++) { // 169
+            for (int a = 0; a < 169; a++) { // 169
                 System.out.print(Dn[b][a]);
                 System.out.print(", ");
             }
